@@ -22,6 +22,12 @@ module AjaxfulRating # :nodoc:
       has_many :rates_without_dimension, :as => :rateable, :class_name => options[:class_name], :dependent => :destroy, :conditions => {:dimension => nil}
       has_many :raters_without_dimension, :through => :rates_without_dimension, :source => :rater
 
+      options[:dimensions].each do |dimension|
+        has_many :"#{dimension}_rates", :dependent => :destroy,
+          :conditions => {:dimension => dimension.to_s}, :class_name => 'Rate', :as => :rateable
+        has_many :"#{dimension}_raters", :through => "#{dimension}_rates", :source => :rater
+      end if options[:dimensions].is_a?(Array)
+
       class << self
         def axr_config(dimension = nil)
           dimension ||= :default
